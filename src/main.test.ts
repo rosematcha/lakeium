@@ -1,10 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { isHelpOpen } from "./dialog";
-import { start as startWatching, type WaitKey, type WaitStore } from "./main";
+import { start as startWatching, type KeyStore, type StoreKey } from "./main";
+import { isVideoActive } from "./video";
 
 // Each test's watcher must stop, or it reacts to later tests' DOM changes.
 const stops: (() => void)[] = [];
-function start(store: WaitStore): void {
+function start(store: KeyStore): void {
   stops.push(startWatching(store));
 }
 afterEach(() => {
@@ -13,7 +14,7 @@ afterEach(() => {
   });
 });
 
-function memoryStore(initial: Partial<Record<WaitKey, number>> = {}): WaitStore & { values: Partial<Record<WaitKey, number>> } {
+function memoryStore(initial: Partial<Record<StoreKey, number>> = {}): KeyStore & { values: Partial<Record<StoreKey, number>> } {
   const values = { ...initial };
   return {
     values,
@@ -53,21 +54,30 @@ describe("start", () => {
     start(memoryStore({ visit: Date.now() }));
     await settle();
     expect(isHelpOpen()).toBe(false);
+    expect(isVideoActive()).toBe(false);
   });
 
-  it("offers help for Trolley even inside the visit wait", async () => {
+  it("plays the video instead of the dialog for Trolley, even inside the visit wait", async () => {
     const store = memoryStore({ visit: Date.now() });
     start(store);
     searchTrolley();
     await settle();
-    expect(isHelpOpen()).toBe(true);
+    expect(isVideoActive()).toBe(true);
+    expect(isHelpOpen()).toBe(false);
     expect(store.values.trolley).toBeTypeOf("number");
+    expect(store.values.trolleyPending).toBeGreaterThan(0);
   });
 
   it("stays quiet for Trolley within the Trolley wait", async () => {
     start(memoryStore({ visit: Date.now(), trolley: Date.now() }));
     searchTrolley();
     await settle();
-    expect(isHelpOpen()).toBe(false);
+    expect(isVideoActive()).toBe(false);
+  });
+
+  it("resumes an unfinished video after a reload", async () => {
+    start(memoryStore({ visit: Date.now(), trolley: Date.now(), trolleyPending: Date.now() }));
+    await settle();
+    expect(isVideoActive()).toBe(true);
   });
 });

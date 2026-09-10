@@ -9,12 +9,14 @@
     "lint": "eslint .",
     "test": "vitest run",
     "knip": "knip",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run knip"
+    "check": "npm run typecheck && npm run lint && npm run test && npm run knip",
+    "pack": "npm run build && crx3 -p lakeium.pem -o lakeium.crx dist"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/chrome": "^0.2.9",
     "@types/node": "^22.20.2",
+    "crx3": "^2.0.0",
     "esbuild": "^0.28.2",
     "eslint": "^10.10.0",
     "happy-dom": "^20.14.3",

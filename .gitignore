@@ -3,3 +3,5 @@ dist/
 .scratch/
 *.zip
 .DS_Store
+*.crx
+*.pem

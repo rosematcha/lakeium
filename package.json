@@ -1,0 +1,26 @@
+{
+  "name": "lakeium",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.ts",
+    "typecheck": "tsc",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "knip": "knip",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run knip"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/chrome": "^0.2.9",
+    "@types/node": "^22.20.2",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.10.0",
+    "happy-dom": "^20.14.3",
+    "knip": "^6.35.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^5.0.0"
+  }
+}

@@ -1,6 +1,17 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { isHelpOpen } from "./dialog";
-import { start, type WaitKey, type WaitStore } from "./main";
+import { start as startWatching, type WaitKey, type WaitStore } from "./main";
+
+// Each test's watcher must stop, or it reacts to later tests' DOM changes.
+const stops: (() => void)[] = [];
+function start(store: WaitStore): void {
+  stops.push(startWatching(store));
+}
+afterEach(() => {
+  stops.splice(0).forEach((stop) => {
+    stop();
+  });
+});
 
 function memoryStore(initial: Partial<Record<WaitKey, number>> = {}): WaitStore & { values: Partial<Record<WaitKey, number>> } {
   const values = { ...initial };

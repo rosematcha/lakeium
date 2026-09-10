@@ -18,20 +18,26 @@ async function offerIfDue(store: WaitStore, key: WaitKey): Promise<void> {
   if (showHelp()) await store.set(key, now);
 }
 
-function watchSearch(onMatch: () => void): void {
+function watchSearch(onMatch: () => void): MutationObserver {
   const check = createSearchTrigger(document);
   let queued = false;
-  new MutationObserver(() => {
+  const observer = new MutationObserver(() => {
     if (queued) return;
     queued = true;
     requestAnimationFrame(() => {
       queued = false;
       if (check()) onMatch();
     });
-  }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["alt"] });
+  });
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["alt"] });
+  return observer;
 }
 
-export function start(store: WaitStore): void {
+/** Starts both triggers; returns a function that stops watching searches. */
+export function start(store: WaitStore): () => void {
   void offerIfDue(store, "visit");
-  watchSearch(() => void offerIfDue(store, "trolley"));
+  const observer = watchSearch(() => void offerIfDue(store, "trolley"));
+  return () => {
+    observer.disconnect();
+  };
 }

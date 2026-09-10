@@ -17,14 +17,12 @@ export const styles = `
 .head { padding: 16px 20px; color: #fff; background: #151515; }
 .head .subtitle { color: #bbb; }
 .body { padding: 4px 20px 20px; }
-.close { color: #fff; background: #2c2c2e; border-color: #48484a; }
-.close:hover { background: #3a3a3c; }
 .close {
   position: absolute; top: 4px; right: 4px;
   display: flex; width: 34px; height: 34px; padding: 0;
   align-items: center; justify-content: center; cursor: pointer;
-  color: inherit; background: var(--lc-el, #ebebeb);
-  border: 1px solid var(--lc-border, #c7c7c7); border-radius: 8px;
+  color: #fff; background: #2c2c2e;
+  border: 1px solid #48484a; border-radius: 8px;
 }
 .close svg { width: 24px; height: 24px; }
 .title { margin: 0; font-size: 20px; font-weight: 700; line-height: 1.3; }
@@ -43,7 +41,8 @@ export const styles = `
   font-size: 15px; font-weight: 700; color: inherit;
   background: var(--lc-el, #ebebeb); border: 1px solid var(--lc-border, #c7c7c7);
 }
-.action:hover, .close:hover { background: var(--lc-el-two, #e0e0e0); }
+.action:hover { background: var(--lc-el-two, #e0e0e0); }
+.close:hover { background: #3a3a3c; }
 .action.primary { color: #fff; background: var(--lc-primary, #a41c32); border-color: var(--lc-primary, #a41c32); }
 .action.primary:hover { filter: brightness(1.1); }
 .action svg { width: 18px; height: 18px; flex: none; }

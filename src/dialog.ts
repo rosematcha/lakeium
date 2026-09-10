@@ -70,14 +70,12 @@ function buildDialog(onClose: () => void): HTMLElement {
   const actions = el("div", "actions");
   actions.append(...ACTIONS.map(actionLink));
 
-  dialog.append(
-    close,
-    title,
-    el("p", "subtitle", "Speak with someone today"),
-    el("p", "service", "988 Suicide and Crisis Lifeline"),
-    details,
-    actions,
-  );
+  const head = el("div", "head");
+  head.append(title, el("p", "subtitle", "Speak with someone today"));
+  const body = el("div", "body");
+  body.append(el("p", "service", "988 Suicide and Crisis Lifeline"), details, actions);
+
+  dialog.append(close, head, body);
   return dialog;
 }
 

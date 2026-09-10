@@ -10,9 +10,15 @@ export const styles = `
 }
 .dialog {
   position: relative; box-sizing: border-box;
-  width: 100%; max-width: 440px; padding: 20px;
+  width: 100%; max-width: 440px; overflow: hidden;
   background: var(--lc-bg-two, #f9f9f9); border-radius: 8px; outline: none;
 }
+/* Header matches the site's black nav bar in both themes. */
+.head { padding: 16px 20px; color: #fff; background: #151515; }
+.head .subtitle { color: #bbb; }
+.body { padding: 4px 20px 20px; }
+.close { color: #fff; background: #2c2c2e; border-color: #48484a; }
+.close:hover { background: #3a3a3c; }
 .close {
   position: absolute; top: 4px; right: 4px;
   display: flex; width: 34px; height: 34px; padding: 0;

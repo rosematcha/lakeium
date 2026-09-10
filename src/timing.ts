@@ -1,5 +1,5 @@
-export const VISIT_WINDOW_MS = 4 * 60 * 60 * 1000;
+export const WAIT_MS = 60 * 60 * 1000;
 
-export function isNewVisit(lastShown: number | undefined, now: number): boolean {
-  return lastShown === undefined || now - lastShown >= VISIT_WINDOW_MS;
+export function isDue(lastShown: number | undefined, now: number): boolean {
+  return lastShown === undefined || now - lastShown >= WAIT_MS;
 }

@@ -1,24 +1,24 @@
 import { showHelp } from "./dialog";
 import { createSearchTrigger } from "./search";
-import { isNewVisit } from "./timing";
+import { isDue } from "./timing";
 
-/** Persists the last time help was offered; backed by chrome.storage or GM storage. */
-export interface LastShownStore {
-  get(): Promise<number | undefined>;
-  set(value: number): Promise<void>;
+/** Each trigger has its own wait, so a page visit doesn't suppress the Trolley offer or vice versa. */
+export type WaitKey = "visit" | "trolley";
+
+/** Persists when help was last shown per trigger; backed by chrome.storage or GM storage. */
+export interface WaitStore {
+  get(key: WaitKey): Promise<number | undefined>;
+  set(key: WaitKey, value: number): Promise<void>;
 }
 
-/** Set by `ALWAYS_SHOW=1 npm run build` to skip the visit window while testing. */
-declare const __ALWAYS_SHOW__: boolean;
-
-async function offerOnVisit(store: LastShownStore): Promise<void> {
+async function offerIfDue(store: WaitStore, key: WaitKey): Promise<void> {
   const now = Date.now();
-  if (!__ALWAYS_SHOW__ && !isNewVisit(await store.get(), now)) return;
-  await store.set(now);
-  showHelp();
+  if (!isDue(await store.get(key), now)) return;
+  // Only start the wait if the dialog actually appeared (it may already be open).
+  if (showHelp()) await store.set(key, now);
 }
 
-function watchSearch(): void {
+function watchSearch(onMatch: () => void): void {
   const check = createSearchTrigger(document);
   let queued = false;
   new MutationObserver(() => {
@@ -26,12 +26,12 @@ function watchSearch(): void {
     queued = true;
     requestAnimationFrame(() => {
       queued = false;
-      if (check()) showHelp();
+      if (check()) onMatch();
     });
   }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["alt"] });
 }
 
-export function start(store: LastShownStore): void {
-  void offerOnVisit(store);
-  watchSearch();
+export function start(store: WaitStore): void {
+  void offerIfDue(store, "visit");
+  watchSearch(() => void offerIfDue(store, "trolley"));
 }

@@ -109,8 +109,8 @@ function syncTheme(host: HTMLElement, doc: Document): void {
  * Mounts on <body>, outside the SvelteKit app container, so hydration and
  * client-side re-renders can't remove it. Theme variables are mirrored instead of inherited.
  */
-export function showHelp(doc: Document = document): void {
-  if (isHelpOpen(doc)) return;
+export function showHelp(doc: Document = document): boolean {
+  if (isHelpOpen(doc)) return false;
   const host = doc.createElement("div");
   host.id = HOST_ID;
   const shadow = host.attachShadow({ mode: "open" });
@@ -144,4 +144,5 @@ export function showHelp(doc: Document = document): void {
   themeWatcher.observe(doc.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["class"] });
   doc.addEventListener("keydown", onKey, true);
   dialog.focus();
+  return true;
 }

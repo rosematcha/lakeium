@@ -7,7 +7,7 @@ const userscriptHeader = `// ==UserScript==
 // @name         Lakeium
 // @namespace    lakeium
 // @version      ${version}
-// @description  Shows crisis support resources on Limitless deck builder.
+// @description  For Lake-kun.
 // @match        https://my.limitlesstcg.com/*
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -17,12 +17,7 @@ const userscriptHeader = `// ==UserScript==
 // ==/UserScript==
 `;
 
-const shared = {
-  bundle: true,
-  format: "iife",
-  target: "chrome120",
-  define: { __ALWAYS_SHOW__: process.env.ALWAYS_SHOW === "1" ? "true" : "false" },
-} as const;
+const shared = { bundle: true, format: "iife", target: "chrome120" } as const;
 
 rmSync("dist", { recursive: true, force: true });
 rmSync("dist-userscript", { recursive: true, force: true });

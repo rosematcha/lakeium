@@ -12,6 +12,8 @@ const userscriptHeader = `// ==UserScript==
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @run-at       document-idle
+// @downloadURL  https://github.com/rosematcha/lakeium/releases/latest/download/lakeium.user.js
+// @updateURL    https://github.com/rosematcha/lakeium/releases/latest/download/lakeium.user.js
 // ==/UserScript==
 `;
 

@@ -3,11 +3,8 @@ import { createSearchTrigger } from "./search";
 import { isDue } from "./timing";
 import { showTrolleyVideo } from "./video";
 
-/**
- * visit and trolley hold when each trigger last fired, so they wait independently.
- * trolleyPending holds when an unfinished video started (0 once watched), so reloading can't skip it.
- */
-export type StoreKey = "visit" | "trolley" | "trolleyPending";
+/** When each trigger last completed, so they wait independently. */
+export type StoreKey = "visit" | "trolley";
 
 /** Persists timestamps per key; backed by chrome.storage or GM storage. */
 export interface KeyStore {
@@ -15,21 +12,17 @@ export interface KeyStore {
   set(key: StoreKey, value: number): Promise<void>;
 }
 
-async function offerIfDue(store: KeyStore, key: "visit" | "trolley", show: () => boolean): Promise<void> {
+async function offerVisit(store: KeyStore): Promise<void> {
   const now = Date.now();
-  if (!isDue(await store.get(key), now)) return;
-  // Only start the wait if it actually appeared (it may already be showing).
-  if (show()) await store.set(key, now);
+  if (!isDue(await store.get("visit"), now)) return;
+  // Only start the wait if the dialog actually appeared (it may already be open).
+  if (showHelp()) await store.set("visit", now);
 }
 
-function playTrolley(store: KeyStore): boolean {
-  const shown = showTrolleyVideo(() => void store.set("trolleyPending", 0));
-  if (shown) void store.set("trolleyPending", Date.now());
-  return shown;
-}
-
-async function resumePendingVideo(store: KeyStore): Promise<void> {
-  if (await store.get("trolleyPending")) playTrolley(store);
+/** The Trolley wait starts once the video has been watched through, not when it appears. */
+async function offerTrolley(store: KeyStore): Promise<void> {
+  if (!isDue(await store.get("trolley"), Date.now())) return;
+  showTrolleyVideo(() => void store.set("trolley", Date.now()));
 }
 
 function watchSearch(onMatch: () => void): MutationObserver {
@@ -49,9 +42,8 @@ function watchSearch(onMatch: () => void): MutationObserver {
 
 /** Starts both triggers; returns a function that stops watching searches. */
 export function start(store: KeyStore): () => void {
-  void offerIfDue(store, "visit", () => showHelp());
-  void resumePendingVideo(store);
-  const observer = watchSearch(() => void offerIfDue(store, "trolley", () => playTrolley(store)));
+  void offerVisit(store);
+  const observer = watchSearch(() => void offerTrolley(store));
   return () => {
     observer.disconnect();
   };

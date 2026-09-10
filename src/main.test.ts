@@ -36,6 +36,19 @@ function searchTrolley(): void {
   );
 }
 
+function post(payload: object): void {
+  window.dispatchEvent(
+    new MessageEvent("message", { data: JSON.stringify(payload), origin: "https://www.youtube-nocookie.com" }),
+  );
+}
+
+function watchVideoThrough(): void {
+  for (let t = 0; t <= 16; t += 0.5) {
+    post({ event: "infoDelivery", info: { currentTime: t, duration: 16, playerState: 1 } });
+  }
+  post({ event: "onStateChange", info: 0 });
+}
+
 describe("start", () => {
   beforeEach(() => {
     document.body.innerHTML = "<div data-root></div>";
@@ -47,7 +60,6 @@ describe("start", () => {
     await settle();
     expect(isHelpOpen()).toBe(true);
     expect(store.values.visit).toBeTypeOf("number");
-    expect(store.values.trolley).toBeUndefined();
   });
 
   it("stays quiet within the visit wait", async () => {
@@ -57,15 +69,19 @@ describe("start", () => {
     expect(isVideoActive()).toBe(false);
   });
 
-  it("plays the video instead of the dialog for Trolley, even inside the visit wait", async () => {
+  it("plays the video for Trolley without starting the wait until it is watched", async () => {
     const store = memoryStore({ visit: Date.now() });
     start(store);
     searchTrolley();
     await settle();
     expect(isVideoActive()).toBe(true);
     expect(isHelpOpen()).toBe(false);
+    expect(store.values.trolley).toBeUndefined();
+
+    watchVideoThrough();
+    await settle();
+    expect(isVideoActive()).toBe(false);
     expect(store.values.trolley).toBeTypeOf("number");
-    expect(store.values.trolleyPending).toBeGreaterThan(0);
   });
 
   it("stays quiet for Trolley within the Trolley wait", async () => {
@@ -75,9 +91,9 @@ describe("start", () => {
     expect(isVideoActive()).toBe(false);
   });
 
-  it("resumes an unfinished video after a reload", async () => {
-    start(memoryStore({ visit: Date.now(), trolley: Date.now(), trolleyPending: Date.now() }));
+  it("does not bring the video back on reload until the next search", async () => {
+    start(memoryStore({ visit: Date.now() }));
     await settle();
-    expect(isVideoActive()).toBe(true);
+    expect(isVideoActive()).toBe(false);
   });
 });

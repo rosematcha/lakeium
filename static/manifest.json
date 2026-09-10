@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Lakeium",
   "version": "0.1.0",
-  "description": "Shows crisis support resources on Limitless deck builder.",
+  "description": "For Lake-kun.",
   "permissions": ["storage"],
   "content_scripts": [
     {

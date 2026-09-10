@@ -83,7 +83,32 @@ export function isHelpOpen(doc: Document = document): boolean {
   return doc.getElementById(HOST_ID) !== null;
 }
 
-/** Mounts inside the site's theme root so --lc-* variables (light and dark) inherit into the shadow tree. */
+const THEME_VARS = [
+  "--lc-primary",
+  "--lc-text",
+  "--lc-text-two",
+  "--lc-bg-two",
+  "--lc-el",
+  "--lc-el-two",
+  "--lc-border",
+  "--lc-link-blue",
+] as const;
+
+/** Copies the site's current --lc-* values onto the host so light and dark themes carry over. */
+function syncTheme(host: HTMLElement, doc: Document): void {
+  const root = doc.querySelector("[data-root]");
+  if (!root) return;
+  const computed = getComputedStyle(root);
+  for (const name of THEME_VARS) {
+    const value = computed.getPropertyValue(name).trim();
+    if (value) host.style.setProperty(name, value);
+  }
+}
+
+/**
+ * Mounts on <body>, outside the SvelteKit app container, so hydration and
+ * client-side re-renders can't remove it. Theme variables are mirrored instead of inherited.
+ */
 export function showHelp(doc: Document = document): void {
   if (isHelpOpen(doc)) return;
   const host = doc.createElement("div");
@@ -94,8 +119,12 @@ export function showHelp(doc: Document = document): void {
   const onKey = (event: KeyboardEvent): void => {
     if (event.key === "Escape") dismiss();
   };
+  const themeWatcher = new MutationObserver(() => {
+    syncTheme(host, doc);
+  });
   function dismiss(): void {
     doc.removeEventListener("keydown", onKey, true);
+    themeWatcher.disconnect();
     host.remove();
     previousFocus?.focus();
   }
@@ -110,7 +139,9 @@ export function showHelp(doc: Document = document): void {
   overlay.append(dialog);
   shadow.append(style, overlay);
 
-  (doc.querySelector("[data-root]") ?? doc.body).append(host);
+  doc.body.append(host);
+  syncTheme(host, doc);
+  themeWatcher.observe(doc.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["class"] });
   doc.addEventListener("keydown", onKey, true);
   dialog.focus();
 }

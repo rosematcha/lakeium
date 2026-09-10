@@ -9,12 +9,26 @@ function shadow(): ShadowRoot {
 
 describe("showHelp", () => {
   beforeEach(() => {
-    document.body.innerHTML = '<div data-root class="light"></div>';
+    document.body.innerHTML = '<div id="svelte"><div data-root class="light" style="--lc-primary: #a41c32"></div></div>';
   });
 
-  it("mounts inside the site theme root", () => {
+  it("mounts outside the app container", () => {
     showHelp();
-    expect(document.querySelector("[data-root] > #lakeium-help")).not.toBeNull();
+    expect(document.querySelector("body > #lakeium-help")).not.toBeNull();
+    expect(document.querySelector("#svelte #lakeium-help")).toBeNull();
+  });
+
+  it("survives the app re-rendering its container", () => {
+    showHelp();
+    const app = document.getElementById("svelte");
+    if (app) app.innerHTML = '<div data-root class="dark"></div>';
+    expect(isHelpOpen()).toBe(true);
+  });
+
+  it("mirrors the site theme variables", () => {
+    showHelp();
+    const host = document.getElementById("lakeium-help");
+    expect(host?.style.getPropertyValue("--lc-primary")).toBe("#a41c32");
   });
 
   it("renders the four actions", () => {

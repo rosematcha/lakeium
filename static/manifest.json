@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Lakeium",
+  "version": "0.1.0",
+  "description": "Shows crisis support resources on Limitless deck builder.",
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["https://my.limitlesstcg.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

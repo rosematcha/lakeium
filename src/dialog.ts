@@ -1,5 +1,6 @@
 import { icons, type IconName } from "./icons";
 import { styles } from "./styles";
+import { mirrorTheme } from "./theme";
 
 interface Action {
   label: string;
@@ -83,28 +84,6 @@ export function isHelpOpen(doc: Document = document): boolean {
   return doc.getElementById(HOST_ID) !== null;
 }
 
-const THEME_VARS = [
-  "--lc-primary",
-  "--lc-text",
-  "--lc-text-two",
-  "--lc-bg-two",
-  "--lc-el",
-  "--lc-el-two",
-  "--lc-border",
-  "--lc-link-blue",
-] as const;
-
-/** Copies the site's current --lc-* values onto the host so light and dark themes carry over. */
-function syncTheme(host: HTMLElement, doc: Document): void {
-  const root = doc.querySelector("[data-root]");
-  if (!root) return;
-  const computed = getComputedStyle(root);
-  for (const name of THEME_VARS) {
-    const value = computed.getPropertyValue(name).trim();
-    if (value) host.style.setProperty(name, value);
-  }
-}
-
 /**
  * Mounts on <body>, outside the SvelteKit app container, so hydration and
  * client-side re-renders can't remove it. Theme variables are mirrored instead of inherited.
@@ -119,12 +98,9 @@ export function showHelp(doc: Document = document): boolean {
   const onKey = (event: KeyboardEvent): void => {
     if (event.key === "Escape") dismiss();
   };
-  const themeWatcher = new MutationObserver(() => {
-    syncTheme(host, doc);
-  });
   function dismiss(): void {
     doc.removeEventListener("keydown", onKey, true);
-    themeWatcher.disconnect();
+    stopTheme();
     host.remove();
     previousFocus?.focus();
   }
@@ -140,8 +116,7 @@ export function showHelp(doc: Document = document): boolean {
   shadow.append(style, overlay);
 
   doc.body.append(host);
-  syncTheme(host, doc);
-  themeWatcher.observe(doc.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["class"] });
+  const stopTheme = mirrorTheme(host, doc);
   doc.addEventListener("keydown", onKey, true);
   dialog.focus();
   return true;

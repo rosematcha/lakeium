@@ -8,9 +8,12 @@ export interface LastShownStore {
   set(value: number): Promise<void>;
 }
 
+/** Set by `ALWAYS_SHOW=1 npm run build` to skip the visit window while testing. */
+declare const __ALWAYS_SHOW__: boolean;
+
 async function offerOnVisit(store: LastShownStore): Promise<void> {
   const now = Date.now();
-  if (!isNewVisit(await store.get(), now)) return;
+  if (!__ALWAYS_SHOW__ && !isNewVisit(await store.get(), now)) return;
   await store.set(now);
   showHelp();
 }

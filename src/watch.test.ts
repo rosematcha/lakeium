@@ -34,6 +34,19 @@ describe("createWatchTracker", () => {
     expect(track(info(30, ENDED)).done).toBe(true);
   });
 
+  it("completes when the last progress report lands short of the end", () => {
+    const track = createWatchTracker();
+    for (let t = 0; t <= 27.5; t += 0.25) track(info(t));
+    expect(track(info(undefined, ENDED)).done).toBe(true);
+  });
+
+  it("does not count a seek to near the end", () => {
+    const track = createWatchTracker();
+    for (let t = 0; t <= 5; t += 0.25) track(info(t));
+    track(info(28));
+    expect(track(info(30, ENDED)).done).toBe(false);
+  });
+
   it("does not count seeking ahead", () => {
     const track = createWatchTracker();
     track(info(0));

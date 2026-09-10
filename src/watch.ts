@@ -1,7 +1,9 @@
 const ENDED = 0;
 // Normal playback reports progress about every quarter second; anything bigger is a seek.
-const MAX_STEP_S = 1.5;
-const END_TOLERANCE_S = 1;
+const MAX_STEP_S = 2.5;
+// The last progress report can land well short of the end (15.2s of 16s observed) before
+// "ended" arrives with no final time. Seeks are already rejected above, so this stays safe.
+const END_TOLERANCE_S = 3;
 
 export interface PlayerInfo {
   currentTime: number | undefined;

@@ -17,7 +17,12 @@ const userscriptHeader = `// ==UserScript==
 // ==/UserScript==
 `;
 
-const shared = { bundle: true, format: "iife", target: "chrome120" } as const;
+const shared = {
+  bundle: true,
+  format: "iife",
+  target: "chrome120",
+  define: { __BUILD_ID__: String(Date.now()) },
+} as const;
 
 rmSync("dist", { recursive: true, force: true });
 rmSync("dist-userscript", { recursive: true, force: true });

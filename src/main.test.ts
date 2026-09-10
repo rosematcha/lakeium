@@ -15,7 +15,8 @@ afterEach(() => {
 });
 
 function memoryStore(initial: Partial<Record<StoreKey, number>> = {}): KeyStore & { values: Partial<Record<StoreKey, number>> } {
-  const values = { ...initial };
+  // Matches __BUILD_ID__ in vitest.config.ts, so stored timers count as this build's.
+  const values = { build: 1, ...initial };
   return {
     values,
     get: (key) => Promise.resolve(values[key]),
@@ -89,6 +90,16 @@ describe("start", () => {
     searchTrolley();
     await settle();
     expect(isVideoActive()).toBe(false);
+  });
+
+  it("resets both timers when a new build is installed", async () => {
+    const store = memoryStore({ build: 0, visit: Date.now(), trolley: Date.now() });
+    start(store);
+    searchTrolley();
+    await settle();
+    expect(isHelpOpen()).toBe(true);
+    expect(isVideoActive()).toBe(true);
+    expect(store.values.build).toBe(1);
   });
 
   it("does not bring the video back on reload until the next search", async () => {
